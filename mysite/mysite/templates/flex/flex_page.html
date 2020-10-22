@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% load wagtailcore_tags %}
+
+{% block content %}
+    <div class="container my-5">
+        <div>
+            <h1 class="text-center mb-5">{{ self.subtitle }}</h1>
+        </div>
+    </div>
+
+    {% for block in page.content %}
+        {% include_block block  %}
+    {% endfor %}
+
+    </div>
+
+{% endblock %}

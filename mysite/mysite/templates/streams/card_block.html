@@ -1,0 +1,28 @@
+{% load wagtailimages_tags %}
+
+<h1 class="text-center my-5">{{ self.title }}</h1>
+<div class="container" >
+    <div class="card-deck">
+
+        {% for card in self.cards %}
+            {% image card.image fill-300x200 as img %}
+            <div class="card">
+                <img src="{{ img.url }}" class="card-img-top" alt="{{ img.alt }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ card.title }}</h5>
+                    <p class="card-text">{{ card.text }}</p>
+                    {% if card.button_page %}
+                        <a class="btn btn-primary" href="{{ card.button_page.url }}" role="button">
+                            Learn more (internal)
+                        </a>
+                    {% elif card.button_url %}
+                        <a class="btn btn-primary" href="{{ card.button_url }}" role="button">
+                            Learn more (external)
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
