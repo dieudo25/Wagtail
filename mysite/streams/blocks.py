@@ -72,10 +72,50 @@ class CTABlock(blocks.StructBlock):
     title = blocks.CharBlock(required=True,max_length=60)
     text = blocks.RichTextBlock(required=True, features=["bold", "italic"])
     button_page = blocks.PageChooserBlock(required=False)  #internal
-    button_url = blocks.URLBlock(required=False, help_text="If the button page above is selected, that will be used first.")  #external
+    button_url = blocks.URLBlock(required=False, help_text="If the button page above is selected, that will be used first")  #external
     button_text = blocks.CharBlock(required=True, default="Learn more", max_length=40)
 
     class Meta:
         template = "streams/cta_block.html"
         icon = "placeholder"
         label = "Call to action"
+
+
+class LinkStructValue(blocks.StructValue):
+    """Additional logic for our URL Button"""
+
+    def url(self):
+        button_page = self.get("button_page")
+        button_url = self.get("button_url")
+
+        if button_page:
+            return button_page.url
+        elif button_url:
+            return button_url
+
+        return None
+
+    # def latest_posts(self):
+    #     """Add context"""
+
+    #     return BlogDetailPage.objects.live().public()[:3]
+
+
+class ButtonBlock(blocks.StructBlock):
+    """An external or internal URL"""
+
+    button_page = blocks.PageChooserBlock(required=False, help_text="If selected, this URL will be used first")  #internal
+    button_url = blocks.URLBlock(required=False, help_text="If added, this URL will be used secondarily to the button page")  #external
+
+    # def get_context(self, request, *args, **kwargs):
+    #     """Add context"""
+        
+    #     context = super().get_context(request, *args, **kwargs)
+    #     context['latest_posts'] = BlogDetailPage.objects.live().public()[:3]
+    #     return context
+
+    class Meta:
+        template = "streams/button_block.html"
+        icon = "placeholder"
+        label = "Single Button"
+        value_class = LinkStructValue #Connect ButtonBlock to LinkStructValue logic

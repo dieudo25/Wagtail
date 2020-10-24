@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% load wagtailimages_tags wagtailcore_tags %}
+
+{% block content %}
+
+    {% image self.banner_image fill-1200x400 as banner %}
+
+    <img src="{{ banner.url }}" alt="{{ banner.alt }}" style="width: 100%; height: auto">
+
+    <div class="container">
+        <div class="text-center my-5">
+            <h1>
+            
+                {% if self.custom_title %}
+                    {{ self.custom_title }}
+                {% else %}
+                    {{ self.title }}
+                {% endif %}
+
+            </h1>
+
+            {% if self.subtitle %}
+                <h3>{{ self.subtitle }}</h3>
+            {% endif %}
+        </div>
+        <div>
+            <ul>
+
+                {% for loop in  self.blog_authors.all %}
+                    {% image loop.author.image fill-50x50 as img %}
+                    <li class="mb-2">
+                        <img src="{{ img.url }}" class="img-fluid ${3|rounded-top,rounded-right,rounded-bottom,rounded-left,rounded-circle,|}" alt="{{ loop.author.name }}">
+                        {{ loop.author.name }}
+                        {% if loop.author.website %}
+                            <a name="website" id="" class="btn btn-primary ml-2" href="{{ loop.author.website }}" role="button">Website</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+
+            </ul>
+        </div>
+
+        {% if self.categories.count %}
+            <div class="my-5">
+                <ul>
+
+                    {% for cat in self.categories.all %}
+                        <a href="{{ self.get_parent.url }}?category={{ cat.slug }}">
+                            <li>{{ cat.name }}</li>
+                        </a>
+                    {% endfor %}
+
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if self.intro_image %}
+            <div class="container my-5 d-flex justify-content-center">
+                <div class="row">
+                    <div class="col">
+
+                        {% image self.intro_image fill-1100x400 as intro_img %}
+
+                        <img src="{{ intro_img.url }}" alt="{{ intro_img.alt }}">
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        
+        <div class="row my-5">
+            <div class="col-lg-8 offset-lg-2">
+
+                {% for block in page.content %}
+                    {% include_block block  %}
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

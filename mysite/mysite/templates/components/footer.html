@@ -1,0 +1,19 @@
+<footer>
+    <div class="container text-center ">
+        {% if settings.site_settings.SocialMediaSettings.facebook %}
+            <a href="{{ settings.site_settings.SocialMediaSettings.facebook  }}">
+                <i class="fab fa-facebook"></i>
+            </a>
+        {% endif %}
+        {% if settings.site_settings.SocialMediaSettings.twitter %}
+            <a href="{{ settings.site_settings.SocialMediaSettings.twitter }}">
+                <i class="fab fa-twitter"></i>
+            </a>
+        {% endif %}
+        {% if settings.site_settings.SocialMediaSettings.youtube %}
+            <a href="{{ settings.site_settings.SocialMediaSettings.youtube }}">
+                <i class="fab fa-youtube"></i>
+            </a>
+        {% endif %}
+    </div>
+<footer>

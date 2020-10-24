@@ -13,11 +13,11 @@
                     <p class="card-text">{{ card.text }}</p>
                     {% if card.button_page %}
                         <a class="btn btn-primary" href="{{ card.button_page.url }}" role="button">
-                            Learn more (internal)
+                            Learn more
                         </a>
                     {% elif card.button_url %}
                         <a class="btn btn-primary" href="{{ card.button_url }}" role="button">
-                            Learn more (external)
+                            Learn more
                         </a>
                     {% endif %}
                 </div>
