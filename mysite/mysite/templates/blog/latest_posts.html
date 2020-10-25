@@ -6,7 +6,7 @@
     <div class="container my-5">
         <h1 class="mb-4">Latest Posts</h1>
         <h2>Spacial link is : {{ a_special_link }}</h2>
-        {% for post in posts %}
+        {% for post in list_page %}
             <div class="row">
                 <div class="col col-sm-3">
                     {% image post.banner_image fill-250x250 as blog_img %}
@@ -24,4 +24,7 @@
         {% endfor %}
 
     </div>
+
+    {% include 'components/pagination.html' %}
+    
 {% endblock content %}

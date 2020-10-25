@@ -134,7 +134,7 @@ class BlogListPage(RoutablePageMixin, Page):
         # in order to access child properties, such as youtube_video_id an subtitle
         all_posts = BlogDetailPage.objects.live().public().order_by('-first_published_at') # post that are published(live()) and have public status(public())
         
-        paginator = Paginator(all_posts, 1) # @todo change to 5 per page
+        paginator = Paginator(all_posts, 2) # @todo change to 5 per page
 
         page = request.GET.get("page")
 
@@ -146,7 +146,7 @@ class BlogListPage(RoutablePageMixin, Page):
             posts = paginator.page(paginator.num_pages)
 
 
-        context["posts"] = posts
+        context["list_page"] = posts
         context["authors"] = BlogAuthor.objects.all()
         context["a_special_link"] = self.reverse_subpage('latest_post')
         context["categories"] = BlogCategory.objects.all()
@@ -155,7 +155,9 @@ class BlogListPage(RoutablePageMixin, Page):
     @route(r'^latest/$', name="latest_post")
     def latest_blog_post(self, request, *args, **kwargs):
         context = self.get_context(request, *args, **kwargs)
-        context['posts'] = context['posts'][:3]
+
+        all_posts = BlogDetailPage.objects.live().public().order_by('-first_published_at')[:3] # latest post that are published(live()) and have public status(public())
+        context['list_page'] = all_posts
         return render(request, "blog/latest_posts.html", context)
 
     # @route(r'^\?category=(\d+about/)/$', name="blog_category")

@@ -1,0 +1,40 @@
+<div class="container d-flex justify-content-center my-5">
+    <div class="row">
+        <div class="col">
+            
+            {% if list_page.paginator.num_pages > 1 %}
+            
+                <div class="pagination">
+
+                    {% if list_page.has_previous %}
+                        <li class="page-item">
+                            <a href="?page={{ list_page.previous_page_number }}" class="page-link ">
+                                <span>&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in list_page.paginator.page_range %}
+                        <li class="page-item {% if page_num == list_page.number %} active{% endif %}">
+                            <a href="?page={{ page_num }}" class="page-link ">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    
+
+                    {% if list_page.has_next %}
+                        <li class="page-item">
+                            <a href="?page={{ list_page.next_page_number }}" class="page-link ">
+                                <span>&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                        
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+</div>

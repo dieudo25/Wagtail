@@ -23,7 +23,7 @@
         </div>    
         <div class="my-5">
 
-            {% for post in posts %}
+            {% for post in list_page %}
                 <div class="row">
                     <div class="col col-sm-3">
                         {% image post.banner_image fill-250x250 as blog_img %}
@@ -55,20 +55,7 @@
 
         </div>
 
-        <div class="container my-5">
-            <div class="row">
-                <div class="col">
-                    
-                    {% if posts.paginator.num_pages > 1 %}
-                    
-                    <div class="pagination">
-                    
-                    </div>
+        {% include 'components/pagination.html' %}
 
-                    {% endif %}
-
-                </div>
-            </div>
-        </div>
     </div>
 {% endblock content %}
