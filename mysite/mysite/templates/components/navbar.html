@@ -1,3 +1,7 @@
+{% load static wagtailuserbar menus_tags %}
+
+{% get_menu "main" as navigation %}
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="/">Wagtail</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
@@ -9,12 +13,13 @@
       <li class="nav-item active">
         <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/blog/">Blog</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/about/">About</a>
-      </li>
+
+      {% for item in navigation.menu_items.all %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ item.link }}" {% if item.open_in_new_tab %}target="_blank"{% endif %}>{{ item.title }}</a>
+        </li>
+      {% endfor %}
+
       {% comment %} <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
         <div class="dropdown-menu">
