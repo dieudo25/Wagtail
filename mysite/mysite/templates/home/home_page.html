@@ -14,7 +14,7 @@
         <h1 class="display-4">{{ self.banner_title }}</h1>
         <div class="lead">{{ self.banner_subtitle|richtext }}</div>
         {% if self.banner_cta %}
-            <a class="btn btn-primary btn-lg" href="#" role="button">@todo</a>
+            <a class="btn btn-primary btn-lg" href="{{ self.banner_cta.url }}" role="button">Call to action</a>
         {% endif %}
     </div>
     <div id="carouselExampleFade" class="carousel slide carousel-fade" data-ride="carousel">

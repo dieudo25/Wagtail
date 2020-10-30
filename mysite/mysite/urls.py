@@ -8,6 +8,9 @@ from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
+from .api import api_router
+
+
 
 urlpatterns = [
     re_path('^django-admin/', admin.site.urls),
@@ -17,7 +20,9 @@ urlpatterns = [
 
     re_path('^search/$', search_views.search, name='search'),
 
-    re_path('^sitemap.xml$', sitemap)
+    re_path('^api/v2/', api_router.urls),
+
+    re_path('^sitemap.xml$', sitemap),
 
 ]
 

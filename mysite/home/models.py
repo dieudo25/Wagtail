@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from modelcluster.fields import ParentalKey
 
+from wagtail.api import APIField
 from wagtail.core.models import Page, Orderable
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.admin.edit_handlers import (
@@ -14,6 +15,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
+from wagtail.search import index
 
 from streams import blocks
 
@@ -34,12 +36,27 @@ class HomePageCarouselImages(Orderable):
         ImageChooserPanel("carousel_image"),
     ]
 
+    api_fields = [
+        APIField("carousel_image")
+    ]
+
 class HomePage(RoutablePageMixin, Page):
     """Home page model"""
     
     templates = 'templates/home/home_page.html'
 
-    max_count = 1   # Can only have one instance of home page
+    # Limite the child page creation with the one mentionned in the list
+    subpage_types = [
+        'blog.BlogListPage',
+        'contact.ContactPage',
+        'flex.FlexPage',
+    ] 
+
+    # The home page can only live under the root page ( another way of limiting creation) 
+    parent_page_type = [
+        'wagtailcore.Page'
+    ]
+    # max_count = 1   # Can only have one instance of home page
 
     banner_title = models.CharField(max_length=100, blank=False, null=True)
     banner_subtitle = RichTextField(features=['bold', 'italic'])
@@ -67,6 +84,22 @@ class HomePage(RoutablePageMixin, Page):
         null=True,
         blank=True
     )
+
+    # Add custom field to searchable fields
+    search_fields = Page.search_fields + [
+        index.SearchField('banner_title', partial_match=True, boost=2),
+
+    ]
+
+    # Add custom fields to API Endpoint
+    api_fields = [
+        APIField("banner_title"),
+        APIField("banner_subtitle"),
+        APIField("banner_image"),
+        APIField("banner_cta"),
+        APIField("carousel_images"),
+        APIField("content"),
+    ]
 
 
     # Add field to Wagtail Admin

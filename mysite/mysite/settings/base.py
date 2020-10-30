@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'subscribers',
     'blog',
     'menus',
+    'contact',
+    'core',
 
     'wagtail.contrib.forms',
     'wagtail.contrib.modeladmin',
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     'wagtail.search',
     'wagtail.admin',
     'wagtail.core',
+    'wagtail.api.v2',
 
     'modelcluster',
     'taggit',
@@ -61,6 +64,10 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
 
     'django_extensions',
+
+    'captcha',
+    'wagtailcaptcha',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -174,3 +181,10 @@ WAGTAIL_SITE_NAME = "mysite"
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'http://example.com'
+
+
+# Recaptcha
+
+RECAPTCHA_PUBLIC_KEY = "6Lc20tsZAAAAADBW0z9OIwPtHiVddmsp9OOhrL6x"
+RECAPTCHA_PRIVATE_KEY = "6Lc20tsZAAAAAJYKri12kbHojIqlEyaBM2yYRviT"
+NOCAPTCHA = True

@@ -1,0 +1,9 @@
+{% for post in list_page  %}
+ <h1>{{ post.custom_title }}</h1>
+ 
+ {% if post.specific.subtitle %}
+    <h3>{{ post.specific.subtitle }}</h3>
+ {% endif %}
+
+ {{ post.specific.content }}
+{% endfor %}

@@ -2,6 +2,9 @@
 
 from django.db import models
 from django import forms
+from django.core.cache import cache
+from wagtail.api import APIField
+from django.core.cache.utils import make_template_fragment_key
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import render
 
@@ -16,12 +19,32 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import StreamField
 from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.images.api.fields import ImageRenditionField
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
 
 from streams import blocks
 
+from rest_framework.fields import Field
+
+
+class ImageSerializedField(Field):
+    """
+        1st Method to render Image field to the API Endpoint with serializer
+        Use this method if you need more customization 
+    """
+
+    def to_representation(self, value): 
+        """ value represente le nom de l'image dans la classe BlogAuthorOrderable
+            dans la liste de la variable api_fields du nom author_image
+        """ 
+        return {
+            "url": value.file.url,
+            "title": value.title,
+            "width": value.width,
+            "height": value.height,
+        }
 
 class BlogAuthorOrderable(Orderable):
     """Allow us to select one or more blog authors"""
@@ -34,6 +57,37 @@ class BlogAuthorOrderable(Orderable):
 
     panels = [
         SnippetChooserPanel("author"),
+    ]
+
+    # Create property to access author informations from the ForeignKey author
+    @property
+    def author_name(self):
+        return self.author.name
+
+    @property
+    def author_website(self):
+        return self.author.website
+
+    @property
+    def author_image(self):
+        return self.author.image
+
+    api_fields = [
+        APIField("author"),
+        APIField("author_name"),
+        APIField("author_website"),
+
+        # Render image using D RestFramework serializer
+        #APIField("author_image", serializer=ImageSerializedField()),
+
+        # Render image using wagtail ImageRenditionField
+        APIField(
+            "image_anything", # represente the key used in the API endpoint for the image informations
+            serializer=ImageRenditionField(
+                'fill-200x250', # Choose the parameter of the image
+                source="author_image"
+            )               
+        ),
     ]
 
 
@@ -114,6 +168,16 @@ class BlogListPage(RoutablePageMixin, Page):
     """Listing page lists all the Blog Detail Pages."""
 
     template = 'blog/blog_list_page.html'
+
+    ajax_template = "blog/blog_list_page_ajax.html"
+
+    max_count = 1 # Nombre maximum de l'objet
+
+    # Limite the child page creation with the one mentionned in the list
+    subpage_types = [
+        'blog.VideoBlogPage',
+        'blog.ArticleBlogPage',
+    ]
     
     custom_title = models.CharField(
         max_length=100,
@@ -179,8 +243,13 @@ class BlogListPage(RoutablePageMixin, Page):
         )
         return sitemap
 
+
 class BlogDetailPage(Page):
     """Parental Blog detail page"""
+
+    parent_page_types = ["blog.BlogListPage"]
+    subpage_types = [] # This object (page) can not create child pages
+
     custom_title = models.CharField(
         max_length=100,
         blank=False,
@@ -223,6 +292,25 @@ class BlogDetailPage(Page):
         ImageChooserPanel("banner_image"),
         StreamFieldPanel("content"),
     ]
+
+    api_fields = [
+        APIField("blog_authors"),
+        APIField("content"),
+        # APIField(""),
+        # APIField(""),
+    ]
+
+    def save(self, *args, **kwargs):
+
+        # Delete automatically the cache where the name of the cache is 
+        # blog_post_preview from blog_list_page.html
+        key = make_template_fragment_key(
+            "blog_post_preview",
+            [self.id]
+        )
+        cache.delete(key)
+
+        return super().save(*args, **kwargs)
 
 # First subclassed blog post page
 class ArticleBlogPage(BlogDetailPage):

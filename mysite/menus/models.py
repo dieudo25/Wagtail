@@ -1,6 +1,8 @@
 """Menus models"""
 
 from django.db import models
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 
 from django_extensions.db.fields import AutoSlugField
 from modelcluster.fields import ParentalKey
@@ -81,4 +83,15 @@ class Menu(ClusterableModel):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+
+        # Delete automatically the cache where the name of the cache is 
+        # navigation from navbar.html
+        key = make_template_fragment_key(
+            "navigation",
+        )
+        cache.delete(key)
+
+        return super().save(*args, **kwargs)
     
