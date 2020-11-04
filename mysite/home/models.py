@@ -12,6 +12,8 @@ from wagtail.admin.edit_handlers import (
     InlinePanel, 
     PageChooserPanel, 
     StreamFieldPanel,
+    ObjectList,
+    TabbedInterface,
 )
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
@@ -105,16 +107,33 @@ class HomePage(RoutablePageMixin, Page):
     # Add field to Wagtail Admin
     content_panels = Page.content_panels + [
         MultiFieldPanel([
-            FieldPanel('banner_title'),
-            FieldPanel('banner_subtitle'),
-            ImageChooserPanel('banner_image'),
-            PageChooserPanel('banner_cta'),
-        ], heading="Banner Options"),
-        MultiFieldPanel([
             InlinePanel("carousel_images", max_num=5, min_num=1, label='Image'),
         ], heading="Carousel Images"),
         StreamFieldPanel("content"),
     ]
+
+    # Hide wagtail default admin tabs
+    # promote_panels = []
+    # settings_panels = []
+
+    banner_panels = [
+        MultiFieldPanel([
+            FieldPanel('banner_title'),
+            FieldPanel('banner_subtitle'),
+            ImageChooserPanel('banner_image'),
+            PageChooserPanel('banner_cta'),
+        ], heading="Banner options"),
+    ]
+
+    # Edit wagtail panels
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(content_panels, heading="Content"),
+            ObjectList(banner_panels, heading="Banner settings"), # Add sidebar tab in home page edit
+            ObjectList(Page.promote_panels, heading="Promotional Stuff"), # Rename tab in home page edit (promotion)
+            ObjectList(Page.settings_panels, heading="Settings Stuff"), # Rename tab in home page edit (settings)
+        ]
+    )
 
     class Meta:
         verbose_name = "Home Page"
@@ -125,3 +144,20 @@ class HomePage(RoutablePageMixin, Page):
         context = self.get_context(request, *args, **kwargs)
         context['test'] = "HEllo World"
         return render(request, "home/subscribe.html", context)
+    
+    def get_admin_display_title(self):
+        """Set the name of the page displayed in wagtail admin """
+        return 'Home page is the best'
+
+# Set verbose name of the field 'title' of the Home Page 
+# And change the title of the field in the edit view
+# Cette méthode peut être utiliser pour modifier n'importe 
+# qu'elle champ et propriété d'un model django
+HomePage._meta.get_field("title").verbose_name = "To any verbose name"
+HomePage._meta.get_field("title").help_text = "CUSTOM HELP TEXT"
+# HomePage._meta.get_field("title").help_text = None #Delete the hlep text
+
+# Set a default value
+HomePage._meta.get_field("title").default = "Some Default title for home page"
+HomePage._meta.get_field("slug").default = "some-default-title-for-home-page"
+

@@ -9,6 +9,9 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import render
 
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
+from modelcluster.contrib.taggit import ClusterTaggableManager
+
+from taggit.models import TaggedItemBase
 
 from wagtail.core.models import Page, Orderable
 from wagtail.admin.edit_handlers import (
@@ -156,6 +159,18 @@ class BlogCategory(models.Model):
 
         return self.name
 
+    def save(self, *args, **kwargs):
+
+        # Delete automatically the cache where the name of the cache is 
+        # blog_post_preview from blog_list_page.html
+        key = make_template_fragment_key(
+            "blog_category_preview",
+            [self.id]
+        )
+        cache.delete(key)
+
+        return super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Blog Category"
         verbose_name_plural = 'Blog Categories'
@@ -198,6 +213,10 @@ class BlogListPage(RoutablePageMixin, Page):
         # in order to access child properties, such as youtube_video_id an subtitle
         all_posts = BlogDetailPage.objects.live().public().order_by('-first_published_at') # post that are published(live()) and have public status(public())
         
+        if request.GET.get('tag', None):
+            tags = request.GET.get('tag')
+            all_posts = all_posts.filter(tags__slug__in=[tags])
+
         paginator = Paginator(all_posts, 2) # @todo change to 5 per page
 
         page = request.GET.get("page")
@@ -216,6 +235,18 @@ class BlogListPage(RoutablePageMixin, Page):
         context["categories"] = BlogCategory.objects.all()
         return context
 
+    
+    @route(r'^year/(\d+)/(\d+)/$', name="blog_by_year")
+    def blog_by_year(self, request, year, month):
+        context = self.get_context(request)
+
+        print(year)
+        print(month)
+
+        # @todo
+        # Filter the context to get by year
+        return render(request, "blog/latest_posts.html", context)
+    
     @route(r'^latest/$', name="latest_post")
     def latest_blog_post(self, request, *args, **kwargs):
         context = self.get_context(request, *args, **kwargs)
@@ -224,11 +255,36 @@ class BlogListPage(RoutablePageMixin, Page):
         context['list_page'] = all_posts
         return render(request, "blog/latest_posts.html", context)
 
-    # @route(r'^\?category=(\d+about/)/$', name="blog_category")
-    # def post_by_category(self, request, *args, **kwargs):
-    #     context = self.get_context(request, *args, **kwargs)
-    #     context["categories"] = BlogCategory.objects.filter(name)
-    #     return render(request, "blog/latest_posts.html", context)
+    @route(r'^category/(?P<cat_slug>[-\w]*)/$', name="category_view")
+    def category_view(self, request, cat_slug):
+        """Find blog posts based on category"""
+
+        context = self.get_context(request)
+
+        # Check if the category exist
+        try:
+            category = BlogCategory.objects.get(slug=cat_slug)
+        except Exception:
+            category = None
+        
+        if category is None:
+            # Redirect the user to /blog/
+            pass
+        
+        post_by_category = BlogDetailPage.objects.filter(categories__in=[category])
+        paginator = Paginator(post_by_category, 1) # @todo change to 5 per page
+        page = request.GET.get("page")
+
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        context['list_page'] = posts
+
+        return render(request, "blog/latest_posts.html", context)
 
     def get_sitemap_urls(self, request):
         # Uncomment to have no sitemap for this page
@@ -244,11 +300,20 @@ class BlogListPage(RoutablePageMixin, Page):
         return sitemap
 
 
+class BlogPageTag(TaggedItemBase):
+    content_object = ParentalKey(
+        'BlogDetailPage',
+        related_name="tagged_item",
+        on_delete=models.CASCADE,
+    )
+
+
 class BlogDetailPage(Page):
     """Parental Blog detail page"""
 
     parent_page_types = ["blog.BlogListPage"]
     subpage_types = [] # This object (page) can not create child pages
+    tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
 
     custom_title = models.CharField(
         max_length=100,
@@ -279,6 +344,7 @@ class BlogDetailPage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("custom_title"),
+        FieldPanel("tags"),
         MultiFieldPanel(
             [
                 InlinePanel("blog_authors", label="Author", min_num=1, max_num=4)
@@ -332,6 +398,7 @@ class ArticleBlogPage(BlogDetailPage):
 
     content_panels = Page.content_panels + [
         FieldPanel("custom_title"),
+        FieldPanel("tags"),
         ImageChooserPanel("banner_image"),
         FieldPanel("subtitle"),
         ImageChooserPanel("intro_image"),
@@ -358,6 +425,7 @@ class VideoBlogPage(BlogDetailPage):
 
     content_panels = Page.content_panels + [
         FieldPanel("custom_title"),
+        FieldPanel("tags"),
         MultiFieldPanel(
             [
                 InlinePanel("blog_authors", label="Author", min_num=1, max_num=4)

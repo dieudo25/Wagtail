@@ -10,20 +10,19 @@
         <div class="my-5">
             <h2>Categories</h2>
 
-            {% cache 604800 blog_category_preview cat.id %}
-                <ul class="list-group list-group-horizontal">
+            <ul class="list-group list-group-horizontal">
 
-                    {% for cat in categories %}
-                        
-                        <a href="?category={{ cat.slug }}">
+                {% for cat in categories %}
+
+                    {% cache 604800 blog_category_preview cat.id %}
+                        <a href="{% routablepageurl page "category_view" cat.slug %}">
                             <li class="list-group-item">{{ cat.name }}</li>
                         </a>
-                        
-                    {% endfor %}
+                    {% endcache %}
 
-                </ul>
-            {% endcache %}
+                {% endfor %}
 
+            </ul>
         </div>    
         <div class="my-5">
 

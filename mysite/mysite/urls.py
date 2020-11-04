@@ -24,6 +24,8 @@ urlpatterns = [
 
     re_path('^sitemap.xml$', sitemap),
 
+    re_path('', include('allauth.urls')),
+
 ]
 
 
