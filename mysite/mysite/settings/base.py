@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'wagtail.admin',
     'wagtail.core',
     'wagtail.api.v2',
+    'wagtail.contrib.search_promotions',
 
     'modelcluster',
     'taggit',
@@ -154,7 +155,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-be'
 
 TIME_ZONE = 'UTC'
 
